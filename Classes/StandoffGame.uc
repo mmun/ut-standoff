@@ -44,24 +44,32 @@ function Timer()
     - Look at TeamScoreboard as an example of looping through pawn list
       and splitting into teams
   */
-
-  if (bRoundOver) {
-    if (NextRoundCountdown > 0) {
-      for (P = Level.PawnList; P != None; P = P.nextPawn) {
-        if (P.IsA('PlayerPawn')) {
-          PlayerPawn(P).ClearProgressMessages();
-          if ( (NextRoundCountdown < 11) && P.IsA('TournamentPlayer') )
-            TournamentPlayer(P).TimeMessage(NextRoundCountdown);
-          else
-            PlayerPawn(P).SetProgressMessage(NextRoundCountdown$CountDownMessage, 0);
+  if (!bGameEnded) {
+    if (!bRequireReady || CountDown <= 0) {
+      if (bRoundOver) {
+        if (NextRoundCountdown > 0) {
+          for (P = Level.PawnList; P != None; P = P.nextPawn) {
+            if (P.IsA('PlayerPawn')) {
+              PlayerPawn(P).ClearProgressMessages();
+              if ( (NextRoundCountdown < 11) && P.IsA('TournamentPlayer') )
+                TournamentPlayer(P).TimeMessage(NextRoundCountdown);
+              else
+                PlayerPawn(P).SetProgressMessage(NextRoundCountdown$CountDownMessage, 0);
+            }
+          }
+          NextRoundCountdown--;
+        } else {
+          bRoundOver = false;
+          BeginRound();
         }
       }
-      NextRoundCountdown--;
-    } else if (NextRoundCountdown <= 0) {
-      bRoundOver = false;
-      BeginRound();
     }
   }
+}
+
+function StartMatch() {
+  Super.StartMatch();
+  BeginRound();
 }
 
 function EndRound() {
@@ -77,13 +85,6 @@ function BeginRound() {
   local int TeamLoopIndex[4];
   local CTFFlag Flags[4];
   local CTFFlag Flag;
-
-  // Respawn all non-spectator players
-  for (P = Level.PawnList; P != None; P = P.nextPawn) {
-    if (P.IsA('PlayerPawn') && !P.IsA('Spectator')) {
-      Level.Game.RestartPlayer(P);
-    }
-  }
 
   // Store a reference to each flag by team index
   foreach AllActors(class'CTFFlag', Flag) {
@@ -104,8 +105,8 @@ function BeginRound() {
         Flags[P.PlayerReplicationInfo.Team ^ 1].Touch(P);
 
         // Warp them to their own flag stand
-        P.SetLocation(Flags[P.PlayerReplicationInfo.Team].HomeBase.Location);
-        P.SetRotation(Flags[P.PlayerReplicationInfo.Team].HomeBase.Rotation);
+        // P.SetLocation(Flags[P.PlayerReplicationInfo.Team].HomeBase.Location);
+        // P.SetRotation(Flags[P.PlayerReplicationInfo.Team].HomeBase.Rotation);
       }
 
       TeamLoopIndex[P.PlayerReplicationInfo.Team]++;

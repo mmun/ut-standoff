@@ -1,0 +1,1 @@
+class CTFStandoffFlag extends CTFFlag;
