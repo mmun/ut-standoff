@@ -1,0 +1,10 @@
+[Public]
+; Gametypes
+Object=(Name=Standoff.StandoffGame,Class=Class,MetaClass=Botpack.TournamentGameInfo)
+; Preferences
+Preferences=(Caption="Standoff",Parent="Game Types",Class=Standoff.StandoffGame,Immediate=True)
+
+[StandoffGame]
+StartUpMessage=""
+gamegoal="captures wins the match!"
+GameName="Standoff"
